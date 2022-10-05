@@ -1,0 +1,18 @@
+Package: dsREST
+Type: Package
+Title: REST API for datashield
+Version: 0.1.0
+Authors@R:
+    c(person(given = "Iulian",
+             family = "Dragan",
+             role = c("aut", "cre"),
+             email = "iulian.dragan@sib.swiss"))
+Maintainer: Iulian Dragan <iulian.dragan@sib.swiss>
+Description: Integration of datashield with RestRserve featuring persistent remote node connections.
+License: GPL
+Encoding: UTF-8
+LazyData: true
+Depends: RestRserve, processx, R6, digest, dsSwissKnifeClient, dsBaseClient, dsQueryLibrary, txtq
+RoxygenNote: 7.2.0
+Suggests:
+    testthat
