@@ -13,7 +13,7 @@
 	"server2":["test.db", "sophia.db"]
 	},
 "dir": "datashield-engine",
-"listenerFuncDir" : "/mnt/shareddisk/datashield/dsMIP/tests/listener_functions",
+"listenerFuncDir" : "/mnt/shareddisk/datashield/dsREST/tests/listener_functions",
 "listenerStartupFuncs": ["appLogin", "prepareData"],
-"endpointDir" : "/mnt/shareddisk/datashield/dsMIP/tests/endpoints"
+"endpointDir" : "/mnt/shareddisk/datashield/dsREST/tests/endpoints"
 }

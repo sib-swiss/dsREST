@@ -1,3 +1,17 @@
+test_that("Login fails with the bad password", {
+  ### make the request:
+
+  credentials <- jsonlite::base64_enc("guest:guest12aaa3")
+  headers <- list("Authorization" = sprintf("Basic %s", credentials))
+  req <<- Request$new(
+    path = "/login",
+    headers = headers
+  )
+  response <- app$process_request(req)
+
+  expect_equal(response$status_code, 401)
+})
+
 test_that("Login works", {
   ### make the request:
 
@@ -105,4 +119,43 @@ test_that(" Endpoint /descriptivestats works ", {
   response <- app$process_request(req)
   xx<- jsonlite::fromJSON(response$body, simplifyDataFrame = FALSE, simplifyMatrix = TRUE)
   expect_equal(length(xx), 2)
+})
+
+
+test_that("Logout works", {
+  ### make the request:
+
+  req <- Request$new(
+    path = "/logout",
+    cookies = ck
+  )
+  response <- app$process_request(req)
+
+  expect_equal(response$body, 'OK')
+})
+
+
+test_that("Session timeout works", {
+  ### make the request:
+
+  credentials <- jsonlite::base64_enc("guest:guest123")
+  headers <- list("Authorization" = sprintf("Basic %s", credentials))
+  req <<- Request$new(
+    path = "/login",
+    headers = headers
+  )
+  response <- app$process_request(req)
+  ck <- list(user =  response$cookies$user$value, sid = response$cookies$sid$value)
+
+  x <- response$body
+  expect_equal(x, 'OK')
+  Sys.sleep(2)
+ reapOldSessions(resPath, 2)
+ req <- Request$new(
+   path = "/logout",
+   cookies = ck
+ )
+ response <- app$process_request(req)
+
+ expect_equal(response$status_code, 401)
 })

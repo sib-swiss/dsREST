@@ -54,7 +54,7 @@ SentryBackend <- R6::R6Class('SentryBackend',
 
 # closure to create a sentry function with a specified request queue and response path
 #'@export
-makeSentryFunction <- function(requestQ, responsePath, timeout = 1800){
+makeSentryFunction <- function(requestQ, responsePath, loginFuncName = 'authLogin', timeout = 1800){
 
   sentryFunc <-  function(user, password = NULL, sid = NULL ){ # must return a sid
 
@@ -63,16 +63,18 @@ makeSentryFunction <- function(requestQ, responsePath, timeout = 1800){
         return('unauthorized')
       }
       sid <- paste0(runif(1), Sys.time()) %>% digest
-      newPath <- paste0(responsePath, '/', user,'_', sid) # new pipes in here starting with 1
+      newPath <- paste0(responsePath, '/', user, sid) # new pipes in here starting with 1
 
       # send the login command to the listener(s)
-      mesg <- list(fun = 'authLogin', args = list(user, password))
+      mesg <- list(fun = loginFuncName, args = list(user, password))
       logged <- qCommand(reqQ, newPath, message = mesg, wait = TRUE, timeout = 60)
       if(jsonlite::fromJSON(logged$message) != 'OK'){
+        # the response queue has been created already only for this, it needs destroying:
+        unlink(newPath, recursive = TRUE, force = TRUE)
         return('unauthorized')
       }
     } else {  # we have a sid, handle timeouts
-      myPath <- paste0(responsePath, '/', user,'_', sid)
+      myPath <- paste0(responsePath, '/', user, sid)
       lastTime <- file.info(myPath)[,'ctime']
       if(is.na(lastTime) ){ # if it doesn't exist
         return('unauthorized')
@@ -87,5 +89,17 @@ makeSentryFunction <- function(requestQ, responsePath, timeout = 1800){
 
   return(sentryFunc)
 }
+
+reapOldSessions <- function(rPath, timeout = 1800){
+       qs <- list.dirs(rPath, full.names = TRUE, recursive = FALSE) %>% grep('global', ., invert = TRUE, value = TRUE) # 'global' belongs to the main process
+
+     for(p in qs){
+        lastTime <- list.dirs(p, full.names = TRUE, recursive = FALSE) %>% paste0('/head') %>% file.info %>% '[['('mtime') %>% max
+         if(as.numeric(Sys.time()) - as.numeric(lastTime) > timeout){ # off with their heads
+           unlink(p, recursive = TRUE, force = TRUE)
+         }
+       }
+}
+
 
 

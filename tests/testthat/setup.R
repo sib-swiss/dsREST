@@ -3,8 +3,8 @@ library(magrittr)
 
 stopThem <<- TRUE
 x <- system2('docker', args = c('ps'), stdout = TRUE )
-if(length(grep('docker_nodes_mip',x)) < 6){
-  system2('docker-compose', args = c('-f', '../docker_nodes_mip/docker-compose.yml', 'up', '-d'))
+if(length(grep('docker_nodes_dsrest',x, ignore.case = TRUE)) < 6){
+  system2('docker-compose', args = c('-f', '../docker_nodes_dsREST/docker-compose.yml', 'up', '-d'))
   Sys.sleep(60)
   x <- system2('docker', args = c('ps'), stdout = TRUE )
   stopThem <<- TRUE
@@ -82,19 +82,19 @@ reloadListener <- function(){
 
 #####
 deleteme <- function(){
-  qCommand(reqQ, resPath, message = list(fun = 'datashield.symbols', args = list(quote(opals))))$message %>% fromJSON()
-  qCommand(reqQ, resPath, message = list(fun = 'ds.table', args = list("working_set$race", datasources = quote(opals['sophia.db']))))
+  qCommand(reqQ, globalResPath, message = list(fun = 'datashield.symbols', args = list(quote(opals))))$message %>% fromJSON()
+  qCommand(reqQ, globalResPath, message = list(fun = 'ds.table', args = list("working_set$race", datasources = quote(opals['sophia.db']))))
   qCommand(reqQ, globalResPath, message = list(fun = 'datashield.aggregate', args = list(quote(opals), quote(quote(selfUpgrade('dsBase' ,NULL, NULL, NULL , NULL, TRUE))))))
-  qCommand(reqQ, resPath, title = 'STOP')
+  qCommand(reqQ, globalResPath, title = 'STOP')
   qCommand(reqQ, globalResPath, message = list(fun = 'get', args = list('sliceNdice')))
-  qCommand(reqQ, resPath, message = list(fun = 'ds.summary', args = list("tmp_76ea8db84d10ec9e720354154d597ee9" , datasources = quote(opals['sophia.db']))))
+  qCommand(reqQ, globalResPath, message = list(fun = 'ds.summary', args = list("tmp_76ea8db84d10ec9e720354154d597ee9" , datasources = quote(opals['sophia.db']))))
   qCommand(reqQ, globalResPath, message = list(fun = 'datashield.aggregate', args = list(quote(opals), "selfUpgrade('dsQueryLibraryServer' ,NULL, NULL, NULL , NULL, TRUE)")))
 
   }
 
 ## app stuff:
 
-sentry <- makeSentryFunction(requestQ = reqQ, responsePath = resPath)
+sentry <- makeSentryFunction(requestQ = reqQ, responsePath = resPath, loginFuncName = 'authLogin')
 
 sbck<- SentryBackend$new( FUN = sentry)
 
