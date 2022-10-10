@@ -108,7 +108,7 @@ test_that(" Endpoint /runAlgorithm works with logistic regression", {
   expect_equal(x$Ntotal, 214)
 })
 
-
+### !!!!!
 test_that(" Endpoint /descriptivestats works ", {
   ### make the request:
   req <- Request$new(
@@ -149,10 +149,11 @@ test_that("Session timeout works", {
 
   x <- response$body
   expect_equal(x, 'OK')
-  Sys.sleep(2)
- reapOldSessions(resPath, 2)
+  Sys.sleep(config$sessionTimeout + 2)
+
  req <- Request$new(
-   path = "/logout",
+   path = "/descriptivestats",
+   parameters_query = list(covariables = "Alanine.aminotransferase..Enzymatic.activity.volume..in.Serum.or.Plasma", variables ="Urea.nitrogen..Mass.volume..in.Serum.or.Plasma"),
    cookies = ck
  )
  response <- app$process_request(req)

@@ -13,6 +13,7 @@ confFile <- '../config.json'
 config <- readChar(confFile, file.info(confFile)$size) %>%
   gsub('(?<=:)\\s+|(?<=\\{)\\s+|(?<=,)\\s+|(?<=\\[)\\s+','',., perl = TRUE) %>%
   fromJSON()
+assign('config', config, envir = .GlobalEnv)
 if(stopThem){
   conts <<- lapply(x, function(y){
     out <- strsplit(y, '\\s+')[[1]]
@@ -38,7 +39,7 @@ for(i in 1:config$workers){
 
   outPath <- paste0(genPath, '/out_', i)
   errPath <- paste0(genPath, '/err_', i)
-  code <- paste0("dsREST::listen('",confFile, "','", reqPath, "')")
+  code <- paste0("dsREST::listen('",confFile, "','", reqPath, "','", resPath, "')")
   print(code)
   listeners[[i]] <- processx::process$new('/usr/bin/Rscript',
                                           c('-e',code), cleanup = TRUE, stderr = errPath, stdout = outPath)

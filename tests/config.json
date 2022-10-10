@@ -15,5 +15,6 @@
 "dir": "datashield-engine",
 "listenerFuncDir" : "/mnt/shareddisk/datashield/dsREST/tests/listener_functions",
 "listenerStartupFuncs": ["appLogin", "prepareData"],
-"endpointDir" : "/mnt/shareddisk/datashield/dsREST/tests/endpoints"
+"endpointDir" : "/mnt/shareddisk/datashield/dsREST/tests/endpoints",
+"sessionTimeout" : 1800
 }

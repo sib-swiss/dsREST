@@ -1,5 +1,5 @@
 #'@export
-listen <- function(confFile, reqPath, every = 1, heartbeatInterval = 300){
+listen <- function(confFile, reqPath, resGenpath, every = 1, heartbeatInterval = 300){
   #there will be one or more dameons running each a copy of this function, all logged into the remote nodes, all servicing one request queue
   # sourceFile contains all the functions that will be invoked by the endpoints
   library(txtq)
@@ -25,6 +25,8 @@ listen <- function(confFile, reqPath, every = 1, heartbeatInterval = 300){
   ################## round and round #########################################
   st <- as.numeric(Sys.time())
   while(TRUE){
+    # first timeout any old sessions:
+    reapOldSessions(resGenpath, config$sessionTimeout)
     msg <- reqQ$pop(1)
 
     if(nrow(msg) == 0){

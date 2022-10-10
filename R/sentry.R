@@ -90,16 +90,25 @@ makeSentryFunction <- function(requestQ, responsePath, loginFuncName = 'authLogi
   return(sentryFunc)
 }
 
+#'@export
 reapOldSessions <- function(rPath, timeout = 1800){
-       qs <- list.dirs(rPath, full.names = TRUE, recursive = FALSE) %>% grep('global', ., invert = TRUE, value = TRUE) # 'global' belongs to the main process
 
-     for(p in qs){
-        lastTime <- list.dirs(p, full.names = TRUE, recursive = FALSE) %>% paste0('/head') %>% file.info %>% '[['('mtime') %>% max
+     sesss <- list.dirs(rPath, full.names = TRUE, recursive = FALSE) %>% grep('global', ., invert = TRUE, value = TRUE) # 'global' belongs to the main process
+
+     for(s in sesss){
+        parQs <- list.dirs(s, full.names = TRUE, recursive = FALSE) # possibly more than one queue, for requests in parallel in the same session (./1, ./2 etc)
+        if(length(parQs) == 0){ # something went wrong, remove the session and go to the next
+          unlink(s, recursive = TRUE)
+          next
+        }
+        lastTime <- paste0(parQs, '/head') %>% file.info %>% '[['('mtime') %>% max
          if(as.numeric(Sys.time()) - as.numeric(lastTime) > timeout){ # off with their heads
-           unlink(p, recursive = TRUE, force = TRUE)
+           # but proceed nicely, go one by one, leave it alone if somebody locks it right now:
+         sapply(parQs, function(x){
+             q <- lckq(x)
+             q$lockFor(q$destroy()) # if it's already locked this returns FALSE without waiting
+           }) %>% all %>% 'if'(unlink(s, recursive = TRUE))
          }
-       }
+     }
+
 }
-
-
-
