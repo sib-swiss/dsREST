@@ -73,16 +73,19 @@ makeSentryFunction <- function(requestQ, responsePath, loginFuncName = 'authLogi
         unlink(newPath, recursive = TRUE, force = TRUE)
         return('unauthorized')
       }
-    } else {  # we have a sid, handle timeouts
+    } else {  # we have a sid, check if we have the pipes
       myPath <- paste0(responsePath, '/', user, sid)
-      lastTime <- file.info(myPath)[,'ctime']
-      if(is.na(lastTime) ){ # if it doesn't exist
+      if(!file.exists(myPath)){
         return('unauthorized')
       }
-      if(as.numeric(Sys.time()) - as.numeric(lastTime) > timeout){ # too old, sorry
-        unlink(myPath, recursive = TRUE, force = TRUE)
-        return(paste0('timeout after ', timeout, ' seconds'))
-      }
+#      lastTime <- file.info(myPath)[,'ctime']
+#      if(is.na(lastTime) ){ # if it doesn't exist
+#        return('unauthorized')
+#      }
+ #     if(as.numeric(Sys.time()) - as.numeric(lastTime) > timeout){ # too old, sorry
+#        unlink(myPath, recursive = TRUE, force = TRUE)
+ #       return(paste0('timeout after ', timeout, ' seconds'))
+  #    }
     }
     return(sid)
   }

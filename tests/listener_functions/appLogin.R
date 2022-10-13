@@ -1,13 +1,14 @@
-appLogin <- function(usr, pwd){
+appLogin <- function(){
   # config is in the global env
   logindata <- config$loginData
   resourceMap <- config$resourceMap
-
   # finalise logindata
+
   logindata$user <-config$appUser
-  logindata$password <- Sys.getenv('pass')
+  logindata$password <- txtq('.pq')$log()$title
+
+  #logindata$password = 'guest123'
   logindata$driver <- 'OpalDriver'
-  Sys.unsetenv('pass')
   ######### make one logindata entry per resource (as opposed to one per server - we'll have one or more connections per server) ###########
   resnames <- dssSwapKeys(resourceMap)
 

@@ -99,17 +99,17 @@
   bubble$groups <- list(
     list(id = 'measurement',
          label = 'measurement',
-         coVariables = sapply(n, function(x) setdiff(x, c('age', 'race', 'ethnicity', 'gender')), simplify = FALSE)
+         variables = sapply(n, function(x) setdiff(x, c('age', 'race', 'ethnicity', 'gender')), simplify = FALSE)
          ),
     list( id = 'demographics',
           label = 'demographics',
-          coVariables = c('ethnicity', 'race', 'gender'))
+          variables = c('ethnicity', 'race', 'gender'))
    )
   bubble$rootGroup <- list(id = 'root',
                     label = 'Root Group',
                     groups = c('demographics', 'measurement')
   )
-  bubble$coVariables <- lapply(names(varsToCohorts), function(x){
+  bubble$variables <- lapply(names(varsToCohorts), function(x){
     thisone <- varsToCohorts[[x]]
     out <- thisone[setdiff(names(thisone), 'cohorts')]
     out$id <- x

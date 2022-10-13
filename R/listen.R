@@ -1,5 +1,6 @@
 #'@export
 listen <- function(confFile, reqPath, resGenpath, every = 1, heartbeatInterval = 300){
+  options(datashield.progress = FALSE)
   #there will be one or more dameons running each a copy of this function, all logged into the remote nodes, all servicing one request queue
   # sourceFile contains all the functions that will be invoked by the endpoints
   library(txtq)
