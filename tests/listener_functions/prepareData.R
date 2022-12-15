@@ -6,13 +6,13 @@
   })
   # load the 2 data frames
   ################ !!!!!!!!!!!!!!!!!!!!!! ############### only for development!!!!!
-  dssSetOption(list('cdm_schema' = 'synthea_omop'), datasources = opals)
-  dssSetOption(list('vocabulary_schema' = 'omop_vocabulary'), datasources = opals)
+dssSetOption(list('cdm_schema' = 'synthea_omop'), datasources = opals)
+dssSetOption(list('vocabulary_schema' = 'omop_vocabulary'), datasources = opals)
   ##########################################
   tryCatch(dsqLoad(symbol= 'measurement',
                    domain = 'concept_name',
                    query_name = 'measurement',
-                   where_clause = 'value_as_number is not null',
+                   where_clause = 'value_as_number is not null and measurement_date is not null',
                    #  row_limit =  3000000, ## tayside doesn't handle more
                    # row_limit =  3000, ## dev only
                    union = TRUE,
@@ -31,7 +31,7 @@
 
   # fix funky measurement dates:
 
-  dssSubset('measurement', 'measurement', row.filter = 'measurement_date >= "01-01-1970"', datasources = opals)
+  dssSubset('measurement', 'measurement', row.filter = 'as.Date(measurement_date) >= as.Date("01-01-1970")', datasources = opals)
 
   ############## calculate age #####################
   # order by measurement date for each person_id
@@ -103,7 +103,7 @@
          ),
     list( id = 'demographics',
           label = 'demographics',
-          variables = c('ethnicity', 'race', 'gender'))
+          variables = c('age', 'ethnicity', 'race', 'gender'))
    )
   bubble$rootGroup <- list(id = 'root',
                     label = 'Root Group',

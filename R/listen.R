@@ -1,12 +1,12 @@
 #'@export
-listen <- function(confFile, reqPath, resGenpath, every = 1, heartbeatInterval = 300){
-  options(datashield.progress = FALSE)
+listen <- function(parentPID, confFile, reqPath, resGenpath, every = 1, heartbeatInterval = 300, verbose = FALSE){
+  options(datashield.progress = verbose)
   #there will be one or more dameons running each a copy of this function, all logged into the remote nodes, all servicing one request queue
   # sourceFile contains all the functions that will be invoked by the endpoints
   library(txtq)
   library(jsonlite)
   library(magrittr)
-  on.exit(try(datashield.logout(opals)))
+
   reqQ <- txtq(reqPath) # the requests queue
   # obligatory startup processing:
   .processConf(confFile)
@@ -18,16 +18,27 @@ listen <- function(confFile, reqPath, resGenpath, every = 1, heartbeatInterval =
                if(grepl('datashield.errors', e)){ # that's an error on the node(s)
                  e <- datashield.errors()
                }
+                 try(datashield.logout(opals))
                  stop(e)
                })
 
     }) # execute the startup functions (*login*, prepare data, etc)
+  on.exit(try(datashield.logout(opals)))
 
   ################## round and round #########################################
   st <- as.numeric(Sys.time())
   while(TRUE){
     # first timeout any old sessions:
     reapOldSessions(resGenpath, config$sessionTimeout)
+    # check if the app is still alive
+    parentProc <- suppressWarnings(system(paste0('ps -ef | grep ', parentPID, ' | grep -v grep'), intern = TRUE))
+    stillAlive <- grep(paste0(parentPID, ' '), parentProc) # double check for the exact pid
+    if(length(stillAlive) == 0){
+      # parent is gone, exit gracefully:
+      try(datashield.logout(opals))
+      return()
+    }
+
     msg <- reqQ$pop(1)
 
     if(nrow(msg) == 0){
@@ -159,4 +170,5 @@ listen <- function(confFile, reqPath, resGenpath, every = 1, heartbeatInterval =
    return(TRUE)
 }
 
-
+cat("help")
+cat('bla')

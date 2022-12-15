@@ -6,7 +6,7 @@ sliceNdice <- function(sid, func, var, type = 'combine' , cohorts = NULL){
     if(is.null(cohorts)){
       cohorts <- varmap[[var]]$cohorts
     } else {
-      cohorts <- strsplit(cohorts, ',\\s*')[[1]]
+    #  cohorts <- strsplit(cohorts, ',\\s*')[[1]]
       cohorts <- intersect(cohorts, varmap[[var]]$cohorts)
     }
   } else {
@@ -17,13 +17,13 @@ sliceNdice <- function(sid, func, var, type = 'combine' , cohorts = NULL){
 ############## important for all functions!!!! #################
   dfName <- restrictToRelevantCols(var, sid, 'working_set', op)
   on.exit(
-    try(datashield.rm(op, dfName)),
-        add = TRUE, after = FALSE
+    try(datashield.rm(op, dfName))
   )
 
 ##################################################################
   if(varmap[[var]]$type == 'number'){
-    var = paste0('working_set$', var)
+  #  var = paste0('working_set$', var)
+    var = paste0(dfName, '$', var)
     ret <- do.call(func, list(var,type = type ,datasources = op))
     if(type == 'split'){
       if(length(names(op)) == 1){
@@ -37,9 +37,10 @@ sliceNdice <- function(sid, func, var, type = 'combine' , cohorts = NULL){
     if('histogram' %in% cls){  # toJSON doesnt like this
       ret <- sapply(ret, unclass, simplify = FALSE)
     }
-
   } else if(varmap[[var]]$type == 'nominal'){
-    var = paste0('working_set$', var)
+    # var = paste0('working_set$', var)
+    var = paste0(dfName,'$', var)
+
     ret <- dssTable(var, type = type, datasources = op)
 
   ret <- sapply(ret, function(x){

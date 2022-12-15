@@ -1,25 +1,33 @@
 descriptivestats = list(
-  method = 'GET',
+  method = 'POST',
   FUN = function(req,res){
 
-    params <- req$parameters_query
+    #params <- req$parameters_query
 
     if(is.null(params$type)){
       params$type <- 'combine'
     }
     rPath <- paste0(resPath, '/', req$cookies[['user']], req$cookies[['sid']])
+    params <- jsonlite::fromJSON(req$body)
+    if(is.null(params$type)){
+      params$type <- 'combine'
+    }
     covars <- params$covariables
     vars <- params$variables
-    quants <- sapply(c(covars,vars), function(var){
+    allvars <- c(covars, vars)
+    quants <- sapply(allvars, function(var){
         x <- qCommand(reqQ, rPath, message = list(fun = 'sliceNdice',
-                                             args = list( req$cookies[['sid']], 'ds.quantileMean', var, params$type, params$cohorts), timeout = 500))
+                                             args = list( req$cookies[['sid']], 'ds.quantileMean', var, params$type, params$datasets), timeout = 500))
         jsonlite::fromJSON(x$message, simplifyDataFrame = FALSE, simplifyMatrix = TRUE ) %>% unlist
         }, simplify = FALSE)
+    if(length(allvars) == 1){
+      names(quants) <- allvars
+    }
    # heatmaps <- lapply(vars, function(v) lapply(covars, function(c) kevin$sendRequest(combinedHeatmap, list(x = c, y = v, cohorts = params$cohorts))))
     heatmaps <- lapply(vars, function(v){
       lapply(covars, function(c){
         x <- qCommand(reqQ, rPath, message = list(fun = 'combinedHeatmap',
-                                             args = list(req$cookies[['sid']], x = c, y = v, cohorts = params$cohorts), timeout = 500))
+                                             args = list(req$cookies[['sid']], x = c, y = v, show = 'all', cohorts = params$datasets), timeout = 500))
         jsonlite::fromJSON(x$message,simplifyDataFrame = FALSE, simplifyMatrix = TRUE)
       })
    })
@@ -32,3 +40,10 @@ descriptivestats = list(
 
 )
 
+x <- list()
+x <- lapply(1:10, function(i){
+a  <- matrix(rnorm(3*i), ncol=3)
+
+c <- as.big.matrix(a)
+ describe(c)
+})

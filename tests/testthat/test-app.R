@@ -16,6 +16,7 @@ test_that("Login works", {
   ### make the request:
 
   credentials <- jsonlite::base64_enc("guest:guest123")
+  credentials <- jsonlite::base64_enc("idragan:3xC@libur")
   headers <- list("Authorization" = sprintf("Basic %s", credentials))
   req <<- Request$new(
     path = "/login",
@@ -113,13 +114,66 @@ test_that(" Endpoint /descriptivestats works ", {
   ### make the request:
   req <- Request$new(
     path = "/descriptivestats",
-    parameters_query = list(covariables = "Alanine.aminotransferase..Enzymatic.activity.volume..in.Serum.or.Plasma", variables ="Urea.nitrogen..Mass.volume..in.Serum.or.Plasma"),
+    method = 'POST',
+    body = '{
+      "variables": [ "Alanine.aminotransferase..Enzymatic.activity.volume..in.Serum.or.Plasma"
+      ],
+      "covariables": ["Albumin..Mass.volume..in.Serum.or.Plasma"],
+      "datasets": [
+        "sophia.db",
+        "test.db",
+        "omop_test.db"
+      ]
+    }',
+    cookies = ck
+  )
+  response <- app$process_request(req)
+
+  xx<- jsonlite::fromJSON(response$body, simplifyDataFrame = FALSE, simplifyMatrix = TRUE)
+  expect_equal(length(xx), 2)
+})
+
+test_that(" Endpoint /descriptivestats works 2 ", {
+  ### make the request:
+  req <- Request$new(
+    path = "/descriptivestats",
+    method = 'POST',
+    body = '{
+    {"variables":["Apolipoprotein.C.II..Mass.volume..in.Serum.or.Plasma"],
+    "covariables":["Cholesterol.in.VLDL..Moles.volume..in.Serum.or.Plasma"],
+    "datasets":["accelerate.db"]}',
+    cookies = ck
+  )
+  response <- app$process_request(req)
+
+  xx<- jsonlite::fromJSON(response$body, simplifyDataFrame = FALSE, simplifyMatrix = TRUE)
+  expect_equal(length(xx), 2)
+})
+
+
+  test_that(" Endpoint /descriptivestats works with one variable ", {
+  ### make the request:
+  req <- Request$new(
+    path = "/descriptivestats",
+    method = 'POST',
+    parameters_query = list(variables = c("Alanine.aminotransferase..Enzymatic.activity.volume..in.Serum.or.Plasma")),
+    body = '{
+      "variables": [ "Alanine.aminotransferase..Enzymatic.activity.volume..in.Serum.or.Plasma"
+      ],
+      "datasets": [
+        "sophia.db",
+        "test.db",
+        "omop_test.db"
+      ]
+    }',
+
     cookies = ck
   )
   response <- app$process_request(req)
   xx<- jsonlite::fromJSON(response$body, simplifyDataFrame = FALSE, simplifyMatrix = TRUE)
-  expect_equal(length(xx), 2)
+  expect_false(is.null(names(xx$quants)))
 })
+
 
 
 test_that("Logout works", {

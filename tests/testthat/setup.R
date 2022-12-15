@@ -27,7 +27,8 @@ setP <- function(p, pth){
 }
 
 ###### read the configuration:
-confFile <- '../config.json'
+#confFile <- '../config.json
+confFile <- '/mnt/shareddisk/mip/datashield-engine/conf/config.json'
 config <- readChar(confFile, file.info(confFile)$size) %>%
   gsub('(?<=:)\\s+|(?<=\\{)\\s+|(?<=,)\\s+|(?<=\\[)\\s+','',., perl = TRUE) %>%
   fromJSON()
@@ -35,7 +36,7 @@ assign('config', config, envir = .GlobalEnv)
 
 
 ############ only for testing #################
-config$sessionTimeout <- 30 # enough for tests
+#config$sessionTimeout <- 30 # enough for tests
 write(jsonlite::toJSON(config), '../configtest.json')
 confFile <- '../configtest.json'
 #############################################
@@ -44,7 +45,7 @@ assign('conts', conts, envir = .GlobalEnv)
 
 #### set the password:
 
-setP('guest123', '.pq')
+setP('3xC@libur', '.pq')
 
 ################ launch the listener(s)
 
@@ -88,7 +89,7 @@ deleteme <- function(){
   qCommand(reqQ, globalResPath, message = list(fun = 'datashield.aggregate', args = list(quote(opals), quote(quote(selfUpgrade('dsBase' ,NULL, NULL, NULL , NULL, TRUE))))))
   qCommand(reqQ, globalResPath, title = 'STOP')
   qCommand(reqQ, globalResPath, message = list(fun = 'get', args = list('sliceNdice')))
-  qCommand(reqQ, globalResPath, message = list(fun = 'ds.summary', args = list("tmp_76ea8db84d10ec9e720354154d597ee9" , datasources = quote(opals['sophia.db']))))
+  qCommand(reqQ, globalResPath, message = list(fun = 'ds.summary', args = list("tmp_816444147297c7db7ce4e560573c2e33" , datasources = quote(opals))))
   qCommand(reqQ, globalResPath, message = list(fun = 'datashield.aggregate', args = list(quote(opals), "selfUpgrade('dsQueryLibraryServer' ,NULL, NULL, NULL , NULL, TRUE)")))
 
   }

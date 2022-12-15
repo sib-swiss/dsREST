@@ -1,4 +1,4 @@
-combinedHeatmap <- function (sid, x = NULL, y = NULL,  show = "zoomed",
+combinedHeatmap <- function (sid, x = NULL, y = NULL,  show = "all",
                              numints = 20, method = "smallCellsRule", k = 3, noise = 0.25,
                              cohorts = NULL) {
 
@@ -8,9 +8,9 @@ combinedHeatmap <- function (sid, x = NULL, y = NULL,  show = "zoomed",
       return(NULL)
     }
   }
-  if(!is.null(cohorts)){
-    cohorts <- strsplit(cohorts, ',\\s*')
-  }
+ # if(!is.null(cohorts)){
+#    cohorts <- strsplit(cohorts, ',\\s*')
+ # }
 
   finalCohorts <- Reduce(function(x,y){ # keep only the common datasources
     if(is.null(x)){
@@ -31,7 +31,7 @@ combinedHeatmap <- function (sid, x = NULL, y = NULL,  show = "zoomed",
   }
 
   ############## important for all functions!!!! #################
-  dfName <- restrictToRelevantCols(var, sid, 'working_set', datasources)
+  dfName <- restrictToRelevantCols(c(x,y), sid, 'working_set', datasources)
  # on.exit(
 #    try(datashield.rm(datasources, dfName)),
  #   add = TRUE, after = FALSE
@@ -48,8 +48,10 @@ combinedHeatmap <- function (sid, x = NULL, y = NULL,  show = "zoomed",
     stop("y=NULL. Please provide the names of the 2nd numeric vector!",
          call. = FALSE)
   }
-  x <- paste0('working_set$',x)
-  y <- paste0('working_set$',y)
+  #x <- paste0('working_set$',x)
+  #y <- paste0('working_set$',y)
+  x <- paste0(dfName, '$',x)
+  y <- paste0(dfName,'$',y)
 
   if (method != "smallCellsRule" & method != "deterministic" &
       method != "probabilistic") {
@@ -57,9 +59,12 @@ combinedHeatmap <- function (sid, x = NULL, y = NULL,  show = "zoomed",
          call. = FALSE)
   }
   xnames <- extract(x)
-  x.lab <- sub('working_set$', '', xnames[[length(xnames)]], fixed = TRUE)
+#  x.lab <- sub('working_set$', '', xnames[[length(xnames)]], fixed = TRUE)
+  x.lab <- sub(paste0(dfName,'$'), '', xnames[[length(xnames)]], fixed = TRUE)
   ynames <- extract(y)
-  y.lab <- sub('working_set$', '',  ynames[[length(ynames)]], fixed = TRUE)
+  #y.lab <- sub('working_set$', '',  ynames[[length(ynames)]], fixed = TRUE)
+  y.lab <- sub(paste0(dfName,'$'), '', ynames[[length(ynames)]], fixed = TRUE)
+
   stdnames <- names(datasources)
   num.sources <- length(datasources)
   if (method == "deterministic") {
@@ -171,10 +176,10 @@ combinedHeatmap <- function (sid, x = NULL, y = NULL,  show = "zoomed",
   y <- grid.density.obj[[1]][, (numcol)]
   z <- Global.grid.density
   if (show == "all") {
-    png('./heatmap.png')
+  #  png('./heatmap.png')
     fields::image.plot(x, y, z, xlab = x.lab, ylab = y.lab,
                        main = "Heatmap Plot of the Pooled Data")
-    dev.off()
+   # dev.off()
     x <- x  # to keep the code format
   }
   else if (show == "zoomed") {
